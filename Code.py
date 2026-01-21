@@ -111,11 +111,13 @@ def mark_attendance():
         for (x, y, w, h) in faces:
             face_img = gray[y:y + h, x:x + w]
             id_, conf = recognizer.predict(face_img)
+            print("Confidence:", conf)
             if conf < 50:
                 uid, name = id_to_uid_name[id_]
                 now = datetime.now().strftime("%H:%M:%S")
                 attendance[uid] = {"Name": name, "Time": now}
                 cv2.putText(frame, f"{name}", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+
             else:
                 cv2.putText(frame, "Unknown", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
             cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
@@ -133,8 +135,8 @@ def mark_attendance():
         df = pd.DataFrame(data)
         csv_file = os.path.join(attendance_folder, f"attendance_{today}.csv")
         df.to_csv(csv_file, index=False)
-        messagebox.showinfo("Saved", f"✅ Attendance saved: {csv_file}")
-        status_label.config(text=f"✅ Attendance saved for {len(attendance)} people")
+        messagebox.showinfo("Saved", f"✅ Attendance saved!")
+        status_label.config(text=f"✅ Attendance saved!")
     else:
         messagebox.showwarning("No Face Detected", "No attendance recorded!")
 
@@ -156,7 +158,7 @@ def check_attendance():
 
     if not user_history.empty:
         tk.Label(history_frame, text=f"Attendance for UID: {uid}", font=("Helvetica", 12, "bold"), bg="#0D1117", fg="lightgreen").pack()
-        for index, row in user_history.iterrows():
+        for _, row in user_history.iterrows():
             tk.Label(history_frame, text=f"{row['Name']} - {row['Time']}", font=("Helvetica", 12), bg="#0D1117", fg="white").pack()
     else:
         tk.Label(history_frame, text=f"No attendance found for UID: {uid}", font=("Helvetica", 12, "bold"), bg="#0D1117", fg="red").pack()
